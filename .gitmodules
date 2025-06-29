@@ -1,0 +1,3 @@
+[submodule "mods/tga_encoder"]
+	path = mods/tga_encoder
+	url = https://git.minetest.land/erle/tga_encoder.git
