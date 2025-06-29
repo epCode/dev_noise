@@ -18,7 +18,7 @@ local dnp = {
 }
 
 
-dofile(core.get_modpath("noise_vis").."/util.lua")
+dofile(core.get_modpath("dn_noise_vis").."/util.lua")
 
 local only_interface = minetest.settings:get_bool("only_interface", true)
 
