@@ -15,6 +15,7 @@ local dnp = {
   seed = 47,
   octaves = 8,
   persistence = 0.6,
+  lacunarity = 2.0,
 }
 
 
@@ -43,6 +44,7 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
     seed = noiseparams.seed or dnp.seed,
     octaves = noiseparams.octaves or dnp.octaves,
     persistence = noiseparams.persistence or dnp.persistence,
+    lacunarity = noiseparams.lacunarity or dnp.lacunarity,
   })
 
   local max_v, min_v = 0, 100
@@ -148,6 +150,7 @@ local function get_noise_formspec(name, image_path, fields)
   local seed = tonumber(fields.seed) or dnp.seed
   local octaves = tonumber(fields.octaves) or dnp.octaves
   local persistence = tonumber(fields.persistence) or dnp.persistence
+  local lacunarity = tonumber(fields.lacunarity) or dnp.lacunarity
   local xpos = tonumber(fields.xpos) or 0
   local ypos = tonumber(fields.ypos) or 0
   local zpos = tonumber(fields.zpos) or 0
@@ -162,6 +165,7 @@ local function get_noise_formspec(name, image_path, fields)
   seed = ]]..seed..[[,
   octaves = ]]..octaves..[[,
   persistence = ]]..persistence..[[,
+  lacunarity = ]]..lacunarity..[[,
 },
   ]]
   local background = "background[-0.5,-0.5;19,12;noise_vis_bg.png]"
@@ -191,11 +195,12 @@ local function get_noise_formspec(name, image_path, fields)
                    "field[4.5,1;3,1;seed;Seed;"..seed.."]" ..
                    "field[4.5,2;3,1;octaves;Octaves;"..octaves.."]" ..
                    "field[8.5,1;3,1;persistence;Persistence;"..persistence.."]" ..
+                   "field[12.5,1;3,1;lacunarity;Lacunarity;"..lacunarity.."]" ..
                    "field[4.5,3;3,1;xpos;x Pos;"..xpos.."]" ..
                    "field[4.5,4;3,1;ypos;y Pos;"..ypos.."]" ..
                    "field[4.5,5;3,1;zpos;z Pos;"..zpos.."]" ..
                    backimage ..
-                   "field[12.5,1;3,1;dist;Distance;"..dist.."]" ..
+                   "field[11.5,1;1,1;dist;Dist;"..dist.."]" ..
                    "image_button[0.75,5.8;7,3.5;noise_vis_button.png;submit;]" ..
                    "image_button[15.5,0;1.2,1.2;noise_vis_quit_button.png;quitbutton;]" ..
                    "image_button[2.74,8.9;3,1.5;noise_vis_code_button.png;code;]"
@@ -238,6 +243,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         local seed = tonumber(fields.seed) or dnp.seed
         local octaves = tonumber(fields.octaves) or dnp.octaves
         local persistence = tonumber(fields.persistence) or dnp.persistence
+        local lacunarity = tonumber(fields.lacunarity) or dnp.lacunarity
         local xpos = tonumber(fields.xpos) or 0
         local ypos = tonumber(fields.ypos) or 0
         local zpos = tonumber(fields.zpos) or 0
@@ -279,6 +285,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
           seed = ffields.seed or seed
           octaves = ffields.octaves or octaves
           persistence = ffields.persistence or persistence
+          lacunarity = ffields.lacunarity or lacunarity
           xpos = ffields.xpos or xpos
           ypos = ffields.ypos or ypos
           zpos = ffields.zpos or zpos
@@ -302,6 +309,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
                 seed = seed,
                 octaves = octaves,
                 persistence = persistence,
+                lacunarity = lacunarity,
             }, 50)
           else
             minetest.show_formspec(pname, "noise_map:params", get_noise_formspec(pname, image_path, ffields))
