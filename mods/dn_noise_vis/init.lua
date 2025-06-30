@@ -16,6 +16,7 @@ local dnp = {
   octaves = 8,
   persistence = 0.6,
   lacunarity = 2.0,
+  flags = "",
 }
 
 
@@ -34,7 +35,6 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
   local player = core.get_player_by_name(name)
   if player then
     ppos = vector.round(player:get_pos())
-    --print(vector.distance(ppos, pos1))
   end
 
   local noisemap = core.get_value_noise({
@@ -45,6 +45,7 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
     octaves = noiseparams.octaves or dnp.octaves,
     persistence = noiseparams.persistence or dnp.persistence,
     lacunarity = noiseparams.lacunarity or dnp.lacunarity,
+    flags = noiseparams.flags or dnp.flags,
   })
   
   local lscale, loffset = noiseparams.scale or dnp.scale, noiseparams.offset or dnp.offset
@@ -156,6 +157,7 @@ local function get_noise_formspec(name, image_path, fields)
   local octaves = tonumber(fields.octaves) or dnp.octaves
   local persistence = tonumber(fields.persistence) or dnp.persistence
   local lacunarity = tonumber(fields.lacunarity) or dnp.lacunarity
+  local flags = fields.flags or dnp.flags
   local xpos = tonumber(fields.xpos) or 0
   local ypos = tonumber(fields.ypos) or 0
   local zpos = tonumber(fields.zpos) or 0
@@ -170,7 +172,7 @@ local function get_noise_formspec(name, image_path, fields)
   seed = ]]..seed..[[,
   octaves = ]]..octaves..[[,
   persistence = ]]..persistence..[[,
-  lacunarity = ]]..lacunarity..[[,
+  flags = "]]..flags..[[",
 },
   ]]
   local background = "background[-0.5,-0.5;19,12;noise_vis_bg.png]"
@@ -201,6 +203,7 @@ local function get_noise_formspec(name, image_path, fields)
                    "field[4.5,2;3,1;octaves;Octaves;"..octaves.."]" ..
                    "field[8.5,1;3,1;persistence;Persistence;"..persistence.."]" ..
                    "field[12.5,1;3,1;lacunarity;Lacunarity;"..lacunarity.."]" ..
+                   "field[100,100;3,1;flags;Flags;"..flags.."]" .. -- not adjustable in menu
                    "field[4.5,3;3,1;xpos;x Pos;"..xpos.."]" ..
                    "field[4.5,4;3,1;ypos;y Pos;"..ypos.."]" ..
                    "field[4.5,5;3,1;zpos;z Pos;"..zpos.."]" ..
@@ -250,6 +253,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         local octaves = tonumber(fields.octaves) or dnp.octaves
         local persistence = tonumber(fields.persistence) or dnp.persistence
         local lacunarity = tonumber(fields.lacunarity) or dnp.lacunarity
+        local flags = fields.flags or dnp.flags
         local xpos = tonumber(fields.xpos) or 0
         local ypos = tonumber(fields.ypos) or 0
         local zpos = tonumber(fields.zpos) or 0
@@ -272,16 +276,16 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         if codedisplayer and fields.codesubmit then
           local llooplist = codedisplayer
           if not codedisplayer.spread then
-            print("used)")
             llooplist = codedisplayer[""]
           end
-          print(core.serialize(codedisplayer))
-          for noisep,value in pairs(llooplist) do
-            ffields[noisep] = value
+          if llooplist and #llooplist then
+            for noisep,value in pairs(llooplist) do
+              ffields[noisep] = value
+            end
+            ffields["spread_x"] = llooplist.spread.x
+            ffields["spread_y"] = llooplist.spread.y
+            ffields["spread_z"] = llooplist.spread.z
           end
-          ffields["spread_x"] = llooplist.spread.x
-          ffields["spread_y"] = llooplist.spread.y
-          ffields["spread_z"] = llooplist.spread.z
           
           offset = ffields.offset or offset
           scale = ffields.scale or scale
@@ -292,6 +296,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
           octaves = ffields.octaves or octaves
           persistence = ffields.persistence or persistence
           lacunarity = ffields.lacunarity or lacunarity
+          flags = ffields.flags or flags
           xpos = ffields.xpos or xpos
           ypos = ffields.ypos or ypos
           zpos = ffields.zpos or zpos
@@ -316,6 +321,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
                 octaves = octaves,
                 persistence = persistence,
                 lacunarity = lacunarity,
+                flags = flags,
             }, 50)
           else
             minetest.show_formspec(pname, "noise_map:params", get_noise_formspec(pname, image_path, ffields))
