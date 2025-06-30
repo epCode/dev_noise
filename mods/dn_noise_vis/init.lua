@@ -49,20 +49,22 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
   
   local lscale, loffset = noiseparams.scale or dnp.scale, noiseparams.offset or dnp.offset
 
-  local Nmax_v, Nmin_v = -10000, 10000 -- absurd oposite values
+  --local Nmax_v, Nmin_v = -10000, 10000 -- absurd oposite values
+  
   local max_v, min_v = 2*lscale+loffset, -2*lscale+loffset
 
 	local pixels = {}
 	local colors = {}
+  --[[ --unused min/max visible values
   for z = 1, res.z do
 		for x = 1, res.x do
       local rel = vector.new(x+pos1.x, pos1.y, z+pos1.z)
       local n = noisemap:get_3d(rel)
       if n > Nmax_v then Nmax_v = n elseif n < Nmin_v then Nmin_v = n end
 		end
-	end
-  noise_vis.last_image[name].max = tostring(string.sub(Nmax_v, 1, 5))
-  noise_vis.last_image[name].min = tostring(string.sub(Nmin_v, 1, 5))
+	end]]
+  noise_vis.last_image[name].max = tostring(string.sub(max_v, 1, 5))
+  noise_vis.last_image[name].min = tostring(string.sub(min_v, 1, 5))
   local minn_max = max_v-min_v
   local bright = 255/minn_max -- multiplyer to get the highest value to 255
   for z = 1, res.z do
@@ -175,6 +177,7 @@ local function get_noise_formspec(name, image_path, fields)
 
   if only_interface then
     background = "" ..
+      "allow_close[false]" ..
       "style_type[background;noclip=true]" ..
       "background[-20,-20;70,70;noise_vis_bg.png]"
   end
@@ -218,7 +221,7 @@ local function get_noise_formspec(name, image_path, fields)
   end
   if minv and maxv then
     formspec = formspec ..
-      "label[9,9.71;Visible noise values:]" ..
+      "label[9.7,9.71;Noise values:]" ..
       "label[11.32,9.71;Min: "..minv.."]" ..
       "label[12.32,9.71;Max: "..maxv.."]"
     
