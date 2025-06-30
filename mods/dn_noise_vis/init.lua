@@ -185,12 +185,11 @@ local function get_noise_formspec(name, image_path, fields)
   if not fields.codedisplay then
     backimage = "image[8.26,1.76;9.58,9.58;noise_vis_plate.png]"
   else
-    backimage = "image[8.26,1.76;9.58,6.5;noise_vis_plate.png]"
+    --backimage = "image[8.26,1.76;9.58,6.5;noise_vis_plate.png]"
   end
   
   local formspec = "size[17,10]" ..
                    "label[0.5,0;Noise Map Parameters]" ..
-                   "style_type[textarea;font=bold;font_size=20]" ..
                    background ..
                    --"image[-0.5,-0.5;19,12;noise_vis_bg.png]" ..
                    "field[0.5,1;3,1;offset;Offset;"..offset.."]" ..
@@ -216,6 +215,7 @@ local function get_noise_formspec(name, image_path, fields)
   end
   if fields.codedisplay then
     formspec = formspec ..
+      "style_type[textarea;font=bold;font_size=20]" ..
       "textarea[8.7,1.9;7.55,6.35;codedisplayer;;"..code.."]" ..
       "image_button[8.32,7.5;7.77,2.33;noise_vis_to_code_button.png;codesubmit;]"
   end
