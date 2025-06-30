@@ -9,8 +9,8 @@ noise_vis = {
 
 
 local dnp = {
-  offset = 4,
-  scale = 2,
+  offset = 0.5,
+  scale = 0.25,
   spread = {x = 10, y = 10, z = 10},
   seed = 47,
   octaves = 8,
