@@ -46,8 +46,11 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
     persistence = noiseparams.persistence or dnp.persistence,
     lacunarity = noiseparams.lacunarity or dnp.lacunarity,
   })
+  
+  local lscale, loffset = noiseparams.scale or dnp.scale, noiseparams.offset or dnp.offset
 
-  local max_v, min_v = 0, 100
+  local Nmax_v, Nmin_v = -10000, 10000 -- absurd oposite values
+  local max_v, min_v = 2*lscale+loffset, -2*lscale+loffset
 
 	local pixels = {}
 	local colors = {}
@@ -55,11 +58,11 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
 		for x = 1, res.x do
       local rel = vector.new(x+pos1.x, pos1.y, z+pos1.z)
       local n = noisemap:get_3d(rel)
-      if n > max_v then max_v = n elseif n < min_v then min_v = n end
+      if n > Nmax_v then Nmax_v = n elseif n < Nmin_v then Nmin_v = n end
 		end
 	end
-  noise_vis.last_image[name].max = tostring(string.sub(max_v, 1, 4))
-  noise_vis.last_image[name].min = tostring(string.sub(min_v, 1, 4))
+  noise_vis.last_image[name].max = tostring(string.sub(Nmax_v, 1, 5))
+  noise_vis.last_image[name].min = tostring(string.sub(Nmin_v, 1, 5))
   local minn_max = max_v-min_v
   local bright = 255/minn_max -- multiplyer to get the highest value to 255
   for z = 1, res.z do
