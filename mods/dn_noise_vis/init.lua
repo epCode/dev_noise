@@ -174,7 +174,7 @@ local function get_noise_formspec(name, image_path, fields)
   persistence = ]]..persistence..[[,
   lacunarity = ]]..lacunarity..[[,
   flags = "]]..flags..[[",
-},
+}
   ]]
   local background = "background[-0.5,-0.5;19,12;noise_vis_bg.png]"
 
