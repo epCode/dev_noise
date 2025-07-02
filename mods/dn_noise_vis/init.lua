@@ -172,6 +172,7 @@ local function get_noise_formspec(name, image_path, fields)
   seed = ]]..seed..[[,
   octaves = ]]..octaves..[[,
   persistence = ]]..persistence..[[,
+  lacunarity = ]]..lacunarity..[[,
   flags = "]]..flags..[[",
 },
   ]]
