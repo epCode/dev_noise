@@ -27,7 +27,12 @@ dofile(core.get_modpath("dn_noise_vis").."/util.lua")
 local only_interface = minetest.settings:get_bool("only_interface", true)
 
 
-function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
+function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, whites, blacks, mapname)
+  if whites and blacks then
+    whites, blacks = tonumber(string.sub(whites, 5, -1)), tonumber(string.sub(blacks, 5, -1))
+  else
+    whites, blacks = 0, 255
+  end
   pos1, pos2 = vector.round(pos1), vector.round(pos2)
 
 	local minp = pos1
@@ -76,6 +81,9 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
       local n = noisemap:get_3d(rel)
       if n > max_v then max_v = n elseif n < min_v then min_v = n end
       local cagg = math.min(math.max(math.round((n-min_v)*bright), 0), 255)
+      if cagg < whites or cagg > blacks then
+        cagg = 29
+      end
       pixels[z] = pixels[z] or {}
       pixels[z][x] = {cagg, cagg, cagg}
       if ppos and vector.distance(vector.new(ppos.x,pos1.y,ppos.z), rel) < 3 then
@@ -166,6 +174,8 @@ local function get_noise_formspec(name, image_path, fields)
   local dist = tonumber(fields.dist) or 100
   local minv = fields.minv
   local maxv = fields.maxv
+  local scrollblacks = fields.scrollblacks or "VAL: 255"
+  local scrollwhites = fields.scrollwhites or "VAL: 0"
   local code = [[
 {
   offset = ]]..offset..[[,
@@ -188,7 +198,8 @@ local function get_noise_formspec(name, image_path, fields)
   end
   local backimage = ""
   if not fields.codedisplay then
-    backimage = "image[8.26,1.76;9.58,9.58;noise_vis_plate.png]"
+    backimage = "image[8.26,1.76;9.58,9.58;noise_vis_plate.png]"..
+    "image[7.96,1.77;9.9,9.9;noise_axis.png]"
   else
     --backimage = "image[8.26,1.76;9.58,6.5;noise_vis_plate.png]"
   end
@@ -229,7 +240,18 @@ local function get_noise_formspec(name, image_path, fields)
     formspec = formspec ..
       "label[9.7,9.71;Noise values:]" ..
       "label[11.32,9.71;Min: "..minv.."]" ..
-      "label[12.32,9.71;Max: "..maxv.."]"
+      "label[12.32,9.71;Max: "..maxv.."]" ..
+      "image[16,1.8;0.6,9.5;noise_vis_255_gradient.png]" ..
+      "scrollbaroptions[min=0;max=255;arrows=true]"..
+      "scrollbar[16.5,1.48;0.3,8.9;vertical;scrollwhites;"..(string.sub(scrollwhites, 5, -1)).."]" ..
+      "scrollbaroptions[min=0;max=255;arrows=true]"..
+      "scrollbar[16.8,1.48;0.3,8.9;vertical;scrollblacks;"..(string.sub(scrollblacks, 5, -1)).."]"
+      for i=0, 10 do
+        local mult = math.round((maxv*(1-(i*0.1))+minv*(i*0.1))*100)/100
+        local poss = 1.7*(1-(i*0.1))+9.6*(i*0.1)
+        formspec = formspec .. "label[16,"..poss..";"..mult.."]"
+        
+      end
     
   end
 
@@ -261,6 +283,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         local ypos = tonumber(fields.ypos) or 0
         local zpos = tonumber(fields.zpos) or 0
         local dist = tonumber(fields.dist) or 100
+        local scrollblacks = fields.scrollblacks or "VAL: 255"
+        local scrollwhites = fields.scrollwhites or "VAL: 0"
         local codedisplayer
         if fields.codedisplayer then
           codedisplayer = noise_vis.parse_table(fields.codedisplayer)
@@ -325,7 +349,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
                 persistence = persistence,
                 lacunarity = lacunarity,
                 flags = flags,
-            }, 50)
+            }, scrollwhites, scrollblacks)
           else
             minetest.show_formspec(pname, "noise_map:params", get_noise_formspec(pname, image_path, ffields))
           end
@@ -336,7 +360,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
             core.close_formspec(pname, "noise_map:params")
           end
         else
-          minetest.show_formspec(pname, "noise_map:params", get_noise_formspec(pname, image_path, ffields))
+          --minetest.show_formspec(pname, "noise_map:params", get_noise_formspec(pname, image_path, ffields))
         end
     end
 end)
