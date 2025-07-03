@@ -1,5 +1,7 @@
 local worldpath = minetest.get_worldpath()
 
+local get_value_noise = core.get_value_noise or core.get_perlin
+
 local map_textures_path = worldpath .. "/noisemaps/"
 minetest.mkdir(map_textures_path)
 
@@ -37,7 +39,7 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
     ppos = vector.round(player:get_pos())
   end
 
-  local noisemap = core.get_value_noise({
+  local noisemap = get_value_noise({
     offset = noiseparams.offset or dnp.offset,
     scale = noiseparams.scale or dnp.scale,
     spread = noiseparams.spread or dnp.spread,
