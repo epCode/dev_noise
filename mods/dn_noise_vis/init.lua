@@ -91,7 +91,7 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, mapname)
 
   
   mapname = name or "tnoise"
-  local filename = mapname .. (pos1.x*pos1.y*pos1.z+math.random(1000)) .. ".tga"
+  local filename = mapname .. ".tga"
   
   noise_vis.last_image[name].img = filename
   
