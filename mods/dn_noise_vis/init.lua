@@ -195,8 +195,8 @@ local function get_noise_formspec(name, image_path, fields)
   if minv and maxv then
     whites = (-whites+1)
     blacks = (-blacks+1)
-    tatedmin = math.round((minv*(1-(whites*1))+maxv*(whites*1))*100)*0.01
-    tatedmax = math.round((minv*(1-(blacks*1))+maxv*(blacks*1))*100)*0.01
+    tatedmin = math.round((minv*(1-(whites*1))+maxv*(whites*1))*1000)*0.001
+    tatedmax = math.round((minv*(1-(blacks*1))+maxv*(blacks*1))*1000)*0.001
     code = code ..
 [[local max_noise_value = ]]..tatedmax..[[
 
@@ -271,9 +271,9 @@ local min_noise_value = ]]..tatedmin
       end]]
       if tatedmin and tatedmax then
         local poss = ((-whites+1)*8.25+1.8)
-        formspec = formspec .. "label[16,"..poss..";"..tatedmin.."]"
+        formspec = formspec .. "label[16,"..poss..";"..(math.round(tatedmin*100)*0.01).."]"
         poss = ((-blacks+1)*8.25+1.3)
-        formspec = formspec .. "label[16,"..poss..";"..tatedmax.."]"
+        formspec = formspec .. "label[16,"..poss..";"..(math.round(tatedmax*100)*0.01).."]"
       end
       
     
@@ -352,6 +352,10 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
           ypos = ffields.ypos or ypos
           zpos = ffields.zpos or zpos
           dist = ffields.dist or dist
+        end
+        
+        if fields.scrollwhites and fields.scrollblacks and (string.find(fields.scrollwhites, "CHG") or string.find(fields.scrollblacks, "CHG")) then
+          --minetest.show_formspec(pname, "noise_map:params", get_noise_formspec(pname, image_path, ffields))
         end
         
         
