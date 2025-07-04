@@ -176,6 +176,9 @@ local function get_noise_formspec(name, image_path, fields)
   local maxv = fields.maxv or noise_vis.last_image[name].max
   local scrollblacks = fields.scrollblacks or "VAL: 255"
   local scrollwhites = fields.scrollwhites or "VAL: 0"
+  local whites = tonumber(string.sub(scrollblacks, 5, -1))/255
+  local blacks = tonumber(string.sub(scrollwhites, 5, -1))/255
+  local tatedmin, tatedmax
   local code = [[
 {
   offset = ]]..offset..[[,
@@ -190,16 +193,15 @@ local function get_noise_formspec(name, image_path, fields)
 
 ]]
   if minv and maxv then
-    local whites = tonumber(string.sub(scrollblacks, 5, -1))/255
-    local blacks = tonumber(string.sub(scrollwhites, 5, -1))/255
     whites = (-whites+1)
     blacks = (-blacks+1)
+    tatedmin = math.round((minv*(1-(whites*1))+maxv*(whites*1))*100)*0.01
+    tatedmax = math.round((minv*(1-(blacks*1))+maxv*(blacks*1))*100)*0.01
     code = code ..
-[[local max_noise_value = ]]..minv*(1-(blacks*1))+maxv*(blacks*1)..[[
+[[local max_noise_value = ]]..tatedmax..[[
 
-local min_noise_value = ]]..minv*(1-(whites*1))+maxv*(whites*1)
+local min_noise_value = ]]..tatedmin
   end
-  print(whites, blacks)
   local background = "background[-0.5,-0.5;19,12;noise_vis_bg.png]"
 
   if only_interface then
@@ -254,16 +256,26 @@ local min_noise_value = ]]..minv*(1-(whites*1))+maxv*(whites*1)
       "label[11.32,9.71;Min: "..minv.."]" ..
       "label[12.32,9.71;Max: "..maxv.."]" ..
       "image[16,1.8;0.6,9.5;noise_vis_255_gradient.png]" ..
+      "image[16,1.8;0.6,"..((-blacks+1)*9.5)..";noise_vis_255_gradient.png^[colorize:#422:255]" ..
+      "image[16,"..((-whites+1)*8.25+1.8)..";0.6,"..(whites*9.5)..";noise_vis_255_gradient.png^[colorize:#422:255]" ..
       "scrollbaroptions[min=0;max=255;arrows=true]"..
       "scrollbar[16.5,1.48;0.3,8.9;vertical;scrollwhites;"..(string.sub(scrollwhites, 5, -1)).."]" ..
       "scrollbaroptions[min=0;max=255;arrows=true]"..
       "scrollbar[16.8,1.48;0.3,8.9;vertical;scrollblacks;"..(string.sub(scrollblacks, 5, -1)).."]"
+      --[[
       for i=0, 10 do
         local mult = math.round((maxv*(1-(i*0.1))+minv*(i*0.1))*100)/100
         local poss = 1.7*(1-(i*0.1))+9.6*(i*0.1)
         formspec = formspec .. "label[16,"..poss..";"..mult.."]"
         
+      end]]
+      if tatedmin and tatedmax then
+        local poss = ((-whites+1)*8.25+1.8)
+        formspec = formspec .. "label[16,"..poss..";"..tatedmin.."]"
+        poss = ((-blacks+1)*8.25+1.3)
+        formspec = formspec .. "label[16,"..poss..";"..tatedmax.."]"
       end
+      
     
   end
 
