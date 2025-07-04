@@ -81,7 +81,7 @@ function noise_vis.create_map(pos1, pos2, name, callback, noiseparams, whites, b
       local n = noisemap:get_3d(rel)
       if n > max_v then max_v = n elseif n < min_v then min_v = n end
       local cagg = math.min(math.max(math.round((n-min_v)*bright), 0), 255)
-      if cagg < whites or cagg > blacks then
+      if cagg > (-whites+255) or cagg < (-blacks+255) then
         cagg = 29
       end
       pixels[z] = pixels[z] or {}
@@ -172,8 +172,8 @@ local function get_noise_formspec(name, image_path, fields)
   local ypos = tonumber(fields.ypos) or 0
   local zpos = tonumber(fields.zpos) or 0
   local dist = tonumber(fields.dist) or 100
-  local minv = fields.minv
-  local maxv = fields.maxv
+  local minv = fields.minv or noise_vis.last_image[name].min
+  local maxv = fields.maxv or noise_vis.last_image[name].max
   local scrollblacks = fields.scrollblacks or "VAL: 255"
   local scrollwhites = fields.scrollwhites or "VAL: 0"
   local code = [[
@@ -187,7 +187,19 @@ local function get_noise_formspec(name, image_path, fields)
   lacunarity = ]]..lacunarity..[[,
   flags = "]]..flags..[[",
 }
-  ]]
+
+]]
+  if minv and maxv then
+    local whites = tonumber(string.sub(scrollblacks, 5, -1))/255
+    local blacks = tonumber(string.sub(scrollwhites, 5, -1))/255
+    whites = (-whites+1)
+    blacks = (-blacks+1)
+    code = code ..
+[[local max_noise_value = ]]..minv*(1-(blacks*1))+maxv*(blacks*1)..[[
+
+local min_noise_value = ]]..minv*(1-(whites*1))+maxv*(whites*1)
+  end
+  print(whites, blacks)
   local background = "background[-0.5,-0.5;19,12;noise_vis_bg.png]"
 
   if only_interface then
@@ -332,7 +344,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         
         
         if fields.submit or fields.codesubmit or fields.code then
-          if not fields.code then
+          if not fields.code or true then -- undisabled image gen when pressing code (en case of value changes for min max flux)
             local filename = noise_vis.create_map(pos1, pos2, player:get_player_name(), function(name)
               ffields.minv = noise_vis.last_image[pname].min
               ffields.maxv = noise_vis.last_image[pname].max
